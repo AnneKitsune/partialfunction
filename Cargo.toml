@@ -1,5 +1,5 @@
 [package]
-name = "PartialFunction"
+name = "partial_function"
 version = "0.1.0"
 authors = ["jojolepro <jojolepromain@gmail.com>"]
 description = """
