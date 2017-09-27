@@ -1,5 +1,4 @@
 use std::cmp::Ordering;
-use std::f32;
 
 /// A regular function that is only defined between lower and higher.
 /// If two functions intersect their higher and lower bounds respectively.
