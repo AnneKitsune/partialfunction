@@ -1,6 +1,6 @@
 [package]
 name = "partial_function"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["jojolepro <jojolepromain@gmail.com>"]
 description = """
 A clean way to define function as a set of subfunctions where each has
@@ -8,8 +8,7 @@ defined start and end bounds.
 """
 
 keywords = ["partial", "function", "curve"]
-categories = ["util", "math"]
-documentation = "https://docs.rs/glium"
+documentation = "https://docs.rs/partialfunction"
 repository = "https://github.com/jojolepro/partialfunction"
 license = "Apache-2.0"
 exclude = ["doc"]
