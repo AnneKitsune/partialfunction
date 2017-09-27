@@ -1,20 +1,20 @@
 use std::cmp::Ordering;
 use std::f32;
 
-/// A regular function that is only defined between lower and higher
-/// If two functions intersect their higher and lower bounds respectively
-/// The second will take precedence where f(lower)
+/// A regular function that is only defined between lower and higher.
+/// If two functions intersect their higher and lower bounds respectively.
+/// The second will take precedence where f(lower).
 pub struct BoundedFunction {
     /// The stored function f(x) = ???
     pub func: fn(f32) -> f32,
-    /// The lower bound of the function
+    /// The lower bound of the function.
     pub lower: f32,
-    /// The higher bound of the function
+    /// The higher bound of the function.
     pub higher: f32,
 }
 
-/// Define a functions defined by multiple functions parts
-/// See BoundedFunction
+/// Define a functions defined by multiple functions parts.
+/// See BoundedFunction.
 /// Uses bounds as [lower,higher],
 /// except in the case of a lower bound overlapping a higher bound.
 /// In this case, the lower bound always take precedence.
@@ -46,18 +46,18 @@ impl PartialFunction {
     }
 }
 
-/// A builder to create an immutable PartialFunction
+/// A builder to create an immutable PartialFunction.
 pub struct PartialFunctionBuilder {
     funcs: Vec<BoundedFunction>,
 }
 
 impl PartialFunctionBuilder {
-    /// Creates a new PartialFunctionBuilder
+    /// Creates a new PartialFunctionBuilder.
     pub fn new() -> Self {
         PartialFunctionBuilder { funcs: vec![] }
     }
 
-    /// Adds a bounded function bounded between [lower,higher[ of function func
+    /// Adds a bounded function bounded between [lower,higher[ of function func.
     pub fn with(mut self, lower: f32, higher: f32, func: fn(f32) -> f32) -> Self {
         let f = BoundedFunction {
             func: func,
@@ -69,7 +69,7 @@ impl PartialFunctionBuilder {
         self
     }
 
-    /// Check if you can safely insert into the function list for the specified bounds
+    /// Check if you can safely insert into the function list for the specified bounds.
     pub fn can_insert(&self, lower: f32, higher: f32) -> bool {
         !self.funcs.iter().any(|b| {
             (lower >= b.lower && lower < b.higher) || (higher > b.lower && higher <= b.higher) ||
@@ -77,7 +77,7 @@ impl PartialFunctionBuilder {
         })
     }
 
-    /// Builds the PartialFunction from the functions added using with
+    /// Builds the PartialFunction from the functions added using with.
     pub fn build(mut self) -> PartialFunction {
         self.funcs.sort_by(|a, b| {
             a.lower

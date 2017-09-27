@@ -1,6 +1,6 @@
 [package]
 name = "partial_function"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["jojolepro <jojolepromain@gmail.com>"]
 description = """
 A clean way to define function as a set of subfunctions where each has
