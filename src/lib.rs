@@ -4,13 +4,14 @@ use std::f32;
 /// A regular function that is only defined between lower and higher.
 /// If two functions intersect their higher and lower bounds respectively.
 /// The second will take precedence where f(lower).
-pub struct BoundedFunction {
+pub struct BoundedFunction<B,O>
+where B:PartialOrd{
     /// The stored function f(x) = ???
-    pub func: fn(f32) -> f32,
+    pub func: fn(B) -> O,
     /// The lower bound of the function.
-    pub lower: f32,
+    pub lower: B,
     /// The higher bound of the function.
-    pub higher: f32,
+    pub higher: B,
 }
 
 /// Define a functions defined by multiple functions parts.
@@ -18,19 +19,21 @@ pub struct BoundedFunction {
 /// Uses bounds as [lower,higher],
 /// except in the case of a lower bound overlapping a higher bound.
 /// In this case, the lower bound always take precedence.
-pub struct PartialFunction {
-    funcs: Vec<BoundedFunction>,
+pub struct PartialFunction<B,O>
+where B:PartialOrd{
+    funcs: Vec<BoundedFunction<B,O>>,
 }
 
-impl PartialFunction {
+impl<B,O> PartialFunction<B,O> 
+where B:PartialOrd{
     /// Creates a new PartialFunctionBuilder
-    pub fn new() -> PartialFunctionBuilder {
+    pub fn new() -> PartialFunctionBuilder<B,O> {
         PartialFunctionBuilder::new()
     }
 
     /// Evaluates the partial function.
     /// Returns NAN if no function is defined.
-    pub fn eval(&self, x: f32) -> f32 {
+    pub fn eval(&self, x: B) -> Option<O> {
         let iter = self.funcs.iter().enumerate();
         for (i, bounded) in iter {
             let next = self.funcs.get(i + 1);
@@ -39,46 +42,48 @@ impl PartialFunction {
                 (next.is_some() && next.unwrap().lower != bounded.higher)
             {
                 let f = bounded.func;
-                return f(x);
+                return Some(f(x));
             }
         }
-        f32::NAN
+        None
     }
 }
 
 /// A builder to create an immutable PartialFunction.
-pub struct PartialFunctionBuilder {
-    funcs: Vec<BoundedFunction>,
+pub struct PartialFunctionBuilder<B,O> 
+where B:PartialOrd{
+    funcs: Vec<BoundedFunction<B,O>>,
 }
 
-impl PartialFunctionBuilder {
+impl<B,O> PartialFunctionBuilder<B,O> 
+where B:PartialOrd{
     /// Creates a new PartialFunctionBuilder.
     pub fn new() -> Self {
         PartialFunctionBuilder { funcs: vec![] }
     }
 
     /// Adds a bounded function bounded between [lower,higher[ of function func.
-    pub fn with(mut self, lower: f32, higher: f32, func: fn(f32) -> f32) -> Self {
+    pub fn with(mut self, lower: B, higher: B, func: fn(B) -> O) -> Self {
+        debug_assert!(self.can_insert(&lower, &higher));
         let f = BoundedFunction {
             func: func,
             lower: lower,
             higher: higher,
         };
-        debug_assert!(self.can_insert(lower, higher));
         self.funcs.push(f);
         self
     }
 
     /// Check if you can safely insert into the function list for the specified bounds.
-    pub fn can_insert(&self, lower: f32, higher: f32) -> bool {
+    pub fn can_insert(&self, lower: &B, higher: &B) -> bool {
         !self.funcs.iter().any(|b| {
-            (lower >= b.lower && lower < b.higher) || (higher > b.lower && higher <= b.higher) ||
-                (lower <= b.lower && higher >= b.higher)
+            (lower >= &b.lower && lower < &b.higher) || (higher > &b.lower && higher <= &b.higher) ||
+                (lower <= &b.lower && higher >= &b.higher)
         })
     }
 
     /// Builds the PartialFunction from the functions added using with.
-    pub fn build(mut self) -> PartialFunction {
+    pub fn build(mut self) -> PartialFunction<B,O> {
         self.funcs.sort_by(|a, b| {
             a.lower
                 .partial_cmp(&b.lower)

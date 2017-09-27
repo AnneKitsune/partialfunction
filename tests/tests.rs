@@ -7,22 +7,22 @@ mod tests {
     #[test]
     fn single() {
         let p = PartialFunction::new().with(0.0, 1.0, |x| x).build();
-        assert_eq!(0.5, p.eval(0.5));
+        assert_eq!(Some(0.5), p.eval(0.5));
     }
     #[test]
     fn single_start() {
         let p = PartialFunction::new().with(0.0, 1.0, |x| x).build();
-        assert_eq!(0.0, p.eval(0.0));
+        assert_eq!(Some(0.0), p.eval(0.0));
     }
     #[test]
     fn single_ending() {
         let p = PartialFunction::new().with(0.0, 1.0, |x| x).build();
-        assert_eq!(1.0, p.eval(1.0));
+        assert_eq!(Some(1.0), p.eval(1.0));
     }
     #[test]
     fn single_nan() {
         let p = PartialFunction::new().with(0.0, 1.0, |x| x).build();
-        assert!(p.eval(999.0).is_nan());
+        assert!(p.eval(999.0).is_none());
     }
     #[test]
     fn dual_start() {
@@ -30,7 +30,7 @@ mod tests {
             .with(1.0, 2.0, |x| 5.0)
             .with(0.0, 1.0, |x| x)
             .build();
-        assert_eq!(5.0, p.eval(1.0));
+        assert_eq!(Some(5.0), p.eval(1.0));
     }
     #[test]
     fn dual_end() {
@@ -38,7 +38,7 @@ mod tests {
             .with(0.0, 1.0, |x| x)
             .with(1.0, 2.0, |x| 5.0)
             .build();
-        assert_eq!(5.0, p.eval(1.0));
+        assert_eq!(Some(5.0), p.eval(1.0));
     }
     #[test]
     #[should_panic]
