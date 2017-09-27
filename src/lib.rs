@@ -4,8 +4,10 @@ use std::f32;
 /// A regular function that is only defined between lower and higher.
 /// If two functions intersect their higher and lower bounds respectively.
 /// The second will take precedence where f(lower).
-pub struct BoundedFunction<B,O>
-where B:PartialOrd{
+pub struct BoundedFunction<B, O>
+where
+    B: PartialOrd,
+{
     /// The stored function f(x) = ???
     pub func: fn(B) -> O,
     /// The lower bound of the function.
@@ -19,15 +21,19 @@ where B:PartialOrd{
 /// Uses bounds as [lower,higher],
 /// except in the case of a lower bound overlapping a higher bound.
 /// In this case, the lower bound always take precedence.
-pub struct PartialFunction<B,O>
-where B:PartialOrd{
-    funcs: Vec<BoundedFunction<B,O>>,
+pub struct PartialFunction<B, O>
+where
+    B: PartialOrd,
+{
+    funcs: Vec<BoundedFunction<B, O>>,
 }
 
-impl<B,O> PartialFunction<B,O> 
-where B:PartialOrd{
+impl<B, O> PartialFunction<B, O>
+where
+    B: PartialOrd,
+{
     /// Creates a new PartialFunctionBuilder
-    pub fn new() -> PartialFunctionBuilder<B,O> {
+    pub fn new() -> PartialFunctionBuilder<B, O> {
         PartialFunctionBuilder::new()
     }
 
@@ -50,13 +56,17 @@ where B:PartialOrd{
 }
 
 /// A builder to create an immutable PartialFunction.
-pub struct PartialFunctionBuilder<B,O> 
-where B:PartialOrd{
-    funcs: Vec<BoundedFunction<B,O>>,
+pub struct PartialFunctionBuilder<B, O>
+where
+    B: PartialOrd,
+{
+    funcs: Vec<BoundedFunction<B, O>>,
 }
 
-impl<B,O> PartialFunctionBuilder<B,O> 
-where B:PartialOrd{
+impl<B, O> PartialFunctionBuilder<B, O>
+where
+    B: PartialOrd,
+{
     /// Creates a new PartialFunctionBuilder.
     pub fn new() -> Self {
         PartialFunctionBuilder { funcs: vec![] }
@@ -77,13 +87,14 @@ where B:PartialOrd{
     /// Check if you can safely insert into the function list for the specified bounds.
     pub fn can_insert(&self, lower: &B, higher: &B) -> bool {
         !self.funcs.iter().any(|b| {
-            (lower >= &b.lower && lower < &b.higher) || (higher > &b.lower && higher <= &b.higher) ||
+            (lower >= &b.lower && lower < &b.higher) ||
+                (higher > &b.lower && higher <= &b.higher) ||
                 (lower <= &b.lower && higher >= &b.higher)
         })
     }
 
     /// Builds the PartialFunction from the functions added using with.
-    pub fn build(mut self) -> PartialFunction<B,O> {
+    pub fn build(mut self) -> PartialFunction<B, O> {
         self.funcs.sort_by(|a, b| {
             a.lower
                 .partial_cmp(&b.lower)
