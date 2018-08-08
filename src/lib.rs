@@ -102,3 +102,65 @@ where
         PartialFunction { funcs: self.funcs }
     }
 }
+
+
+struct LowerBoundedFunction<B, O>
+where
+    B: PartialOrd,
+{
+    /// The stored function f(x) = ???
+    pub func: fn(B) -> O,
+    /// The lower bound of the function.
+    pub lower: B,
+}
+
+pub struct LowerPartialFunction<B, O>
+where
+    B: PartialOrd,
+{
+    funcs: Vec<LowerBoundedFunction<B, O>>,
+}
+
+/// A builder to create an immutable PartialFunction.
+pub struct LowerPartialFunctionBuilder<B, O>
+where
+    B: PartialOrd,
+{
+    funcs: Vec<LowerBoundedFunction<B, O>>,
+}
+
+impl<B, O> LowerPartialFunctionBuilder<B, O>
+where
+    B: PartialOrd,
+{
+    /// Creates a new PartialFunctionBuilder.
+    pub fn new() -> Self {
+        LowerPartialFunctionBuilder { funcs: vec![] }
+    }
+
+    /// Adds a bounded function bounded between [lower,higher[ of function func.
+    pub fn with(mut self, lower: B, func: fn(B) -> O) -> Self {
+        debug_assert!(self.can_insert(&lower));
+        let f = LowerBoundedFunction {
+            func,
+            lower,
+        };
+        self.funcs.push(f);
+        self
+    }
+
+    /// Check if you can safely insert into the function list for the specified bounds.
+    pub fn can_insert(&self, lower: &B) -> bool {
+        !self.funcs.iter().any(|b| lower == &b.lower)
+    }
+
+    /// Builds the PartialFunction from the functions added using with.
+    pub fn build(mut self) -> LowerPartialFunction<B, O> {
+        self.funcs.sort_by(|a, b| {
+            a.lower
+                .partial_cmp(&b.lower)
+                .unwrap_or(Ordering::Equal)
+        });
+        LowerPartialFunction { funcs: self.funcs }
+    }
+}
