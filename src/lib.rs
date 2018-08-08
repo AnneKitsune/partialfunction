@@ -37,7 +37,7 @@ where
     }
 
     /// Evaluates the partial function.
-    /// Returns NAN if no function is defined.
+    /// Returns None if no function is defined.
     pub fn eval(&self, x: B) -> Option<O> {
         let iter = self.funcs.iter().enumerate();
         for (i, bounded) in iter {
@@ -104,6 +104,7 @@ where
 }
 
 
+/// A lower bounded function is a function that is valid from [x..infinite[, or until it hits another function's start.
 struct LowerBoundedFunction<B, O>
 where
     B: PartialOrd,
@@ -114,11 +115,46 @@ where
     pub lower: B,
 }
 
+
+/// A lower partial function is a function that is defined by segments valid from [x..infinite[, or until it hits another function's start.
+/// It starts searching at -infinity and goes up to infinity, and takes the last seen function that contains the desired invariable value (x).
+///
+/// Example:
+/// [0..infinity[ = 5
+/// [1..infinity[ = 10
+///
+/// f(0.5) = 5
+/// f(1) = 10
+/// f(70) = 10
 pub struct LowerPartialFunction<B, O>
 where
     B: PartialOrd,
 {
     funcs: Vec<LowerBoundedFunction<B, O>>,
+}
+
+impl<B, O> LowerPartialFunction<B, O>
+where
+    B: PartialOrd,
+{
+    /// Creates a new LowerPartialFunctionBuilder.
+    pub fn new() -> LowerPartialFunctionBuilder<B, O> {
+        LowerPartialFunctionBuilder::new()
+    }
+
+    /// Evaluates the partial function.
+    /// Returns None if no function is defined for the searched invariable value (x).
+    pub fn eval(&self, x: B) -> Option<O> {
+        let iter = self.funcs.iter().enumerate();
+        for (i, bounded) in iter {
+            let next = self.funcs.get(i + 1);
+            if x >= bounded.lower && ((next.is_some() && next.unwrap().lower > x) || next.is_none()){
+                let f = bounded.func;
+                return Some(f(x));
+            }
+        }
+        None
+    }
 }
 
 /// A builder to create an immutable PartialFunction.

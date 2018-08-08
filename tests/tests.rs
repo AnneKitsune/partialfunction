@@ -80,4 +80,39 @@ mod tests {
             .with(0.0, 1.0, |x| 5.0)
             .build();
     }
+
+    #[test]
+    fn lower_partial_normal() {
+        let f = LowerPartialFunction::new()
+            .with(0.0, |x| 1)
+            .with(1.0, |x| 2)
+            .build();
+        assert_eq!(f.eval(-1.0),None);
+        assert_eq!(f.eval(0.0),Some(1));
+        assert_eq!(f.eval(0.5),Some(1));
+        assert_eq!(f.eval(1.0),Some(2));
+        assert_eq!(f.eval(1000.0),Some(2));
+    }
+
+    #[test]
+    fn lower_partial_inverse_insert() {
+        let f = LowerPartialFunction::new()
+            .with(1.0, |x| 2)
+            .with(0.0, |x| 1)
+            .build();
+        assert_eq!(f.eval(-1.0),None);
+        assert_eq!(f.eval(0.0),Some(1));
+        assert_eq!(f.eval(0.5),Some(1));
+        assert_eq!(f.eval(1.0),Some(2));
+        assert_eq!(f.eval(1000.0),Some(2));
+    }
+
+    #[test]
+    #[should_panic]
+    fn lower_partial_overlap() {
+        let f = LowerPartialFunction::new()
+            .with(0.0, |x| 1)
+            .with(0.0, |x| 2)
+            .build();
+    }
 }
