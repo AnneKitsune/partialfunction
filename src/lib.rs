@@ -110,7 +110,7 @@ where
     B: PartialOrd,
 {
     /// The stored function f(x) = ???
-    pub func: fn(B) -> O,
+    pub func: Box<Fn(B) -> O>,
     /// The lower bound of the function.
     pub lower: B,
 }
@@ -135,7 +135,7 @@ where
 
 impl<B, O> LowerPartialFunction<B, O>
 where
-    B: PartialOrd,
+    B: PartialOrd
 {
     /// Creates a new LowerPartialFunctionBuilder.
     pub fn new() -> LowerPartialFunctionBuilder<B, O> {
@@ -149,7 +149,7 @@ where
         for (i, bounded) in iter {
             let next = self.funcs.get(i + 1);
             if x >= bounded.lower && ((next.is_some() && next.unwrap().lower > x) || next.is_none()){
-                let f = bounded.func;
+                let f = &bounded.func;
                 return Some(f(x));
             }
         }
@@ -175,10 +175,10 @@ where
     }
 
     /// Adds a bounded function bounded between [lower,higher[ of function func.
-    pub fn with(mut self, lower: B, func: fn(B) -> O) -> Self {
+    pub fn with<F: Fn(B)->O + 'static>(mut self, lower: B, func: F) -> Self {
         debug_assert!(self.can_insert(&lower));
         let f = LowerBoundedFunction {
-            func,
+            func: Box::new(func),
             lower,
         };
         self.funcs.push(f);
