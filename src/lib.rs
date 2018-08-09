@@ -144,7 +144,7 @@ where
 
     /// Evaluates the partial function.
     /// Returns None if no function is defined for the searched invariable value (x).
-    pub fn eval(&self, x: B) -> Option<O> {
+    pub fn eval(&self, x: B) -> Option<&O> {
         let iter = self.funcs.iter().enumerate();
         for (i, bounded) in iter {
             let next = self.funcs.get(i + 1);
