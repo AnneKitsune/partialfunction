@@ -105,12 +105,12 @@ where
 
 
 /// A lower bounded function is a function that is valid from [x..infinite[, or until it hits another function's start.
-struct LowerBoundedFunction<B, O>
+struct LowerBoundedFunction<'a, B, O: 'a>
 where
     B: PartialOrd,
 {
     /// The stored function f(x) = ???
-    pub func: Box<Fn(B) -> O>,
+    pub func: Box<Fn(B) -> &'a O>,
     /// The lower bound of the function.
     pub lower: B,
 }
@@ -126,25 +126,25 @@ where
 /// f(0.5) = 5
 /// f(1) = 10
 /// f(70) = 10
-pub struct LowerPartialFunction<B, O>
+pub struct LowerPartialFunction<'a, B, O: 'a>
 where
     B: PartialOrd,
 {
-    funcs: Vec<LowerBoundedFunction<B, O>>,
+    funcs: Vec<LowerBoundedFunction<'a, B, O>>,
 }
 
-impl<B, O> LowerPartialFunction<B, O>
+impl<'a, B, O> LowerPartialFunction<'a, B, O>
 where
     B: PartialOrd
 {
     /// Creates a new LowerPartialFunctionBuilder.
-    pub fn new() -> LowerPartialFunctionBuilder<B, O> {
+    pub fn new() -> LowerPartialFunctionBuilder<'a, B, O> {
         LowerPartialFunctionBuilder::new()
     }
 
     /// Evaluates the partial function.
     /// Returns None if no function is defined for the searched invariable value (x).
-    pub fn eval(&self, x: B) -> Option<&O> {
+    pub fn eval(&self, x: B) -> Option<&'a O> {
         let iter = self.funcs.iter().enumerate();
         for (i, bounded) in iter {
             let next = self.funcs.get(i + 1);
@@ -158,14 +158,14 @@ where
 }
 
 /// A builder to create an immutable PartialFunction.
-pub struct LowerPartialFunctionBuilder<B, O>
+pub struct LowerPartialFunctionBuilder<'a, B, O: 'a>
 where
     B: PartialOrd,
 {
-    funcs: Vec<LowerBoundedFunction<B, O>>,
+    funcs: Vec<LowerBoundedFunction<'a, B, O>>,
 }
 
-impl<B, O> LowerPartialFunctionBuilder<B, O>
+impl<'a, B, O: 'a> LowerPartialFunctionBuilder<'a, B, O>
 where
     B: PartialOrd,
 {
@@ -175,7 +175,7 @@ where
     }
 
     /// Adds a bounded function bounded between [lower,higher[ of function func.
-    pub fn with<F: Fn(B)->O + 'static>(mut self, lower: B, func: F) -> Self {
+    pub fn with<F: Fn(B) -> &'a O + 'static>(mut self, lower: B, func: F) -> Self {
         debug_assert!(self.can_insert(&lower));
         let f = LowerBoundedFunction {
             func: Box::new(func),
@@ -191,7 +191,7 @@ where
     }
 
     /// Builds the PartialFunction from the functions added using with.
-    pub fn build(mut self) -> LowerPartialFunction<B, O> {
+    pub fn build(mut self) -> LowerPartialFunction<'a, B, O> {
         self.funcs.sort_by(|a, b| {
             a.lower
                 .partial_cmp(&b.lower)
