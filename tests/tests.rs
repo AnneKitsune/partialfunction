@@ -87,11 +87,11 @@ mod tests {
             .with(0.0, |x| 1)
             .with(1.0, |x| 2)
             .build();
-        assert_eq!(f.eval(-1.0),None);
-        assert_eq!(f.eval(0.0),Some(1));
-        assert_eq!(f.eval(0.5),Some(1));
-        assert_eq!(f.eval(1.0),Some(2));
-        assert_eq!(f.eval(1000.0),Some(2));
+        assert_eq!(f.eval(-1.0), None);
+        assert_eq!(f.eval(0.0), Some(1));
+        assert_eq!(f.eval(0.5), Some(1));
+        assert_eq!(f.eval(1.0), Some(2));
+        assert_eq!(f.eval(1000.0), Some(2));
     }
 
     #[test]
@@ -100,11 +100,11 @@ mod tests {
             .with(1.0, |x| 2)
             .with(0.0, |x| 1)
             .build();
-        assert_eq!(f.eval(-1.0),None);
-        assert_eq!(f.eval(0.0),Some(1));
-        assert_eq!(f.eval(0.5),Some(1));
-        assert_eq!(f.eval(1.0),Some(2));
-        assert_eq!(f.eval(1000.0),Some(2));
+        assert_eq!(f.eval(-1.0), None);
+        assert_eq!(f.eval(0.0), Some(1));
+        assert_eq!(f.eval(0.5), Some(1));
+        assert_eq!(f.eval(1.0), Some(2));
+        assert_eq!(f.eval(1000.0), Some(2));
     }
 
     #[test]

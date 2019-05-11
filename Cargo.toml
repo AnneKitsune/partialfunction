@@ -14,3 +14,4 @@ license = "Apache-2.0"
 exclude = ["doc"]
 
 [dependencies]
+serde = { version = "1.0", features = ["derive"] }
