@@ -1,111 +1,15 @@
 #[macro_use]
-extern crate serde;
+extern crate derive_new;
 
-use serde::Deserialize;
 use std::cmp::Ordering;
-use std::ops::{Add, Mul};
-
-/*
-
-Function
-    StdFunction Fn(I)->I
-    Custom Fn(I)->O
-build()
--> Fn(I) -> O
-
-
-DualBoundedFunction
-    Fn(I) -> O
-    lower: I
-    higher: I
-
-PartialFunction
-    Vec<DualBoundedFunction>
-eval(I)
--> O
-
-
-PartialFunction<I,I>
-eval(I) -> I
-
-PartialFunction<I,O>
-eval(I) -> O
-
-
-O: From<I>
-
-*/
-
-/// Defines the most commonly used functions to allow deserializing a partial function from file.
-#[derive(Deserialize, Serialize)]
-pub enum StdFunction<T: Add + Mul> {
-    /// A constant function.
-    /// `f(x) = a`
-    Constant { a: T },
-    /// An affine (or linear) function.
-    /// `f(x) = a * x + b`
-    Affine { a: T, b: T },
-    /// A logarithmic function.
-    /// `f(x) = a * log(x - b) + c
-    Logarithmic { a: T, b: T, c: T },
-    /// An exponential function.
-    /// `f(x) = a * b ^ (x - c) + d`
-    Exponential { a: T, b: T, c: T, d: T },
-    /// An inverse function.
-    /// `f(x) = a * (1 / (b * x - c)) + d`
-    Inverse { a: T, b: T, c: T },
-    /// A polynomial function.
-    /// `f(x) = a * x ^ 2 + b * x + c`
-    Polynomial { a: T, b: T, c: T },
-}
-
-#[derive(Deserialize, Serialize)]
-pub enum Function<I: Add + Mul + PartialOrd, O> {
-    Std(StdFunction<I>),
-    #[serde(skip)]
-    Custom(Box<Fn(I) -> O>),
-}
-
-impl<I: Add + Mul + PartialOrd + 'static> Function<I, I> {
-    pub fn to_closure(&self) -> Box<Fn(I) -> I> {
-        match *self {
-            Function::Std(f) => match f {
-                StdFunction::Constant { a } => Box::new(move |x| a),
-            },
-            Function::Custom(f) => f,
-        }
-    }
-}
-
-#[derive(Deserialize)]
-pub struct DualBoundedFunctionBuilder<B: Add + Mul + PartialOrd, O> {
-    /// The stored function f(x) = ???
-    pub func: Function<B, O>,
-    /// The lower bound of the function.
-    pub lower: B,
-    /// The higher bound of the function.
-    pub higher: B,
-}
-
-impl<B: Add + Mul + PartialOrd, O> DualBoundedFunctionBuilder<B, O> {
-    pub fn build(self) -> DualBoundedFunction<B, O> {
-        DualBoundedFunction {
-            func: self.func.to_closure(),
-            lower: self.lower,
-            higher: self.higher,
-        }
-    }
-}
 
 /// A regular function that is only defined between lower and higher.
 /// If two functions intersect their higher and lower bounds respectively.
 /// The second will take precedence where f(lower).
-pub struct DualBoundedFunction<B, O>
-where
-    B: Add + Mul + PartialOrd,
-{
+#[derive(new)]
+pub struct DualBoundedFunction<B, O> {
     /// The stored function f(x) = ???
-    pub func: fn(B) -> O,
+    pub func: Box<dyn Fn(B) -> O>,
     /// The lower bound of the function.
     pub lower: B,
     /// The higher bound of the function.
@@ -117,17 +21,11 @@ where
 /// Uses bounds as [lower,higher],
 /// except in the case of a lower bound overlapping a higher bound.
 /// In this case, the lower bound always take precedence.
-pub struct PartialFunction<B, O>
-where
-    B: Add + Mul + PartialOrd,
-{
+pub struct PartialFunction<B, O> {
     funcs: Vec<DualBoundedFunction<B, O>>,
 }
 
-impl<B, O> PartialFunction<B, O>
-where
-    B: Add + Mul + PartialOrd,
-{
+impl<B: PartialOrd, O> PartialFunction<B, O> {
     /// Creates a new PartialFunctionBuilder
     pub fn new() -> PartialFunctionBuilder<B, O> {
         PartialFunctionBuilder::new()
@@ -143,7 +41,7 @@ where
                 || (next.is_none() && x == bounded.higher)
                 || (next.is_some() && next.unwrap().lower != bounded.higher)
             {
-                let f = bounded.func;
+                let f = &bounded.func;
                 return Some(f(x));
             }
         }
@@ -152,24 +50,15 @@ where
 }
 
 /// A builder to create an immutable PartialFunction.
-pub struct PartialFunctionBuilder<B, O>
-where
-    B: Add + Mul + PartialOrd,
-{
+#[derive(new)]
+pub struct PartialFunctionBuilder<B, O> {
+    #[new(default)]
     funcs: Vec<DualBoundedFunction<B, O>>,
 }
 
-impl<B, O> PartialFunctionBuilder<B, O>
-where
-    B: Add + Mul + PartialOrd,
-{
-    /// Creates a new PartialFunctionBuilder.
-    pub fn new() -> Self {
-        PartialFunctionBuilder { funcs: vec![] }
-    }
-
+impl<B: PartialOrd, O> PartialFunctionBuilder<B, O> {
     /// Adds a bounded function bounded between [lower,higher[ of function func.
-    pub fn with(mut self, lower: B, higher: B, func: fn(B) -> O) -> Self {
+    pub fn with(mut self, lower: B, higher: B, func: Box<dyn Fn(B) -> O>) -> Self {
         debug_assert!(self.can_insert(&lower, &higher));
         let f = DualBoundedFunction {
             func: func,
@@ -201,12 +90,10 @@ where
 }
 
 /// A lower bounded function is a function that is valid from [x..infinite[, or until it hits another function's start.
-struct LowerBoundedFunction<B, O>
-where
-    B: PartialOrd,
-{
+#[derive(new)]
+struct LowerBoundedFunction<B, O> {
     /// The stored function f(x) = ???
-    pub func: Box<Fn(B) -> O>,
+    pub func: Box<dyn Fn(B) -> O>,
     /// The lower bound of the function.
     pub lower: B,
 }
@@ -254,22 +141,13 @@ where
 }
 
 /// A builder to create an immutable PartialFunction.
-pub struct LowerPartialFunctionBuilder<B, O>
-where
-    B: PartialOrd,
-{
+#[derive(new)]
+pub struct LowerPartialFunctionBuilder<B, O> {
+    #[new(default)]
     funcs: Vec<LowerBoundedFunction<B, O>>,
 }
 
-impl<B, O> LowerPartialFunctionBuilder<B, O>
-where
-    B: PartialOrd,
-{
-    /// Creates a new PartialFunctionBuilder.
-    pub fn new() -> Self {
-        LowerPartialFunctionBuilder { funcs: vec![] }
-    }
-
+impl<B: PartialOrd, O> LowerPartialFunctionBuilder<B, O> {
     /// Adds a bounded function bounded between [lower,higher[ of function func.
     pub fn with<F: Fn(B) -> O + 'static>(mut self, lower: B, func: F) -> Self {
         debug_assert!(self.can_insert(&lower));
@@ -293,3 +171,4 @@ where
         LowerPartialFunction { funcs: self.funcs }
     }
 }
+

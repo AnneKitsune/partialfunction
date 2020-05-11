@@ -6,7 +6,7 @@ description = """
 A clean way to define function as a set of subfunctions where each has
 defined start and end bounds.
 """
-
+edition = "2018"
 keywords = ["partial", "function", "curve"]
 documentation = "https://docs.rs/partial_function"
 repository = "https://github.com/jojolepro/partialfunction"
@@ -14,4 +14,4 @@ license = "Apache-2.0"
 exclude = ["doc"]
 
 [dependencies]
-serde = { version = "1.0", features = ["derive"] }
+derive-new = "0.5.8"
