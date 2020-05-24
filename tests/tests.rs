@@ -6,22 +6,30 @@ mod tests {
     use partial_function::*;
     #[test]
     fn single() {
-        let p = PartialFunction::new().with(0.0, 1.0, Box::new(|x| x)).build();
+        let p = PartialFunction::new()
+            .with(0.0, 1.0, Box::new(|x| x))
+            .build();
         assert_eq!(Some(0.5), p.eval(0.5));
     }
     #[test]
     fn single_start() {
-        let p = PartialFunction::new().with(0.0, 1.0, Box::new(|x| x)).build();
+        let p = PartialFunction::new()
+            .with(0.0, 1.0, Box::new(|x| x))
+            .build();
         assert_eq!(Some(0.0), p.eval(0.0));
     }
     #[test]
     fn single_ending() {
-        let p = PartialFunction::new().with(0.0, 1.0, Box::new(|x| x)).build();
+        let p = PartialFunction::new()
+            .with(0.0, 1.0, Box::new(|x| x))
+            .build();
         assert_eq!(Some(1.0), p.eval(1.0));
     }
     #[test]
     fn single_nan() {
-        let p = PartialFunction::new().with(0.0, 1.0, Box::new(|x| x)).build();
+        let p = PartialFunction::new()
+            .with(0.0, 1.0, Box::new(|x| x))
+            .build();
         assert!(p.eval(999.0).is_none());
     }
     #[test]

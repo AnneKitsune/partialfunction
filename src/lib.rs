@@ -151,10 +151,7 @@ impl<B: PartialOrd, O> LowerPartialFunctionBuilder<B, O> {
     /// Adds a bounded function bounded between [lower,higher[ of function func.
     pub fn with(mut self, lower: B, func: Box<dyn Fn(B) -> O>) -> Self {
         debug_assert!(self.can_insert(&lower));
-        let f = LowerBoundedFunction {
-            func,
-            lower,
-        };
+        let f = LowerBoundedFunction { func, lower };
         self.funcs.push(f);
         self
     }
@@ -171,4 +168,3 @@ impl<B: PartialOrd, O> LowerPartialFunctionBuilder<B, O> {
         LowerPartialFunction { funcs: self.funcs }
     }
 }
-
