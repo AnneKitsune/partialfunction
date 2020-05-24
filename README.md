@@ -41,3 +41,9 @@ let f = LowerPartialFunction::new()
 assert_eq!(f.eval(5.0), Some(10.0));
 ```
 
+## Adding To Your Project
+Add the following to your Cargo.toml:
+```
+partial_function = "0.5.0"
+```
+
