@@ -1,5 +1,9 @@
 extern crate partial_function;
 
+// All these tests are the same as those in
+// tests.rs, the only difference is that the
+// macro version is used.
+
 #[cfg(test)]
 #[allow(unused_variables)]
 mod tests {
