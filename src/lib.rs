@@ -149,10 +149,10 @@ pub struct LowerPartialFunctionBuilder<B, O> {
 
 impl<B: PartialOrd, O> LowerPartialFunctionBuilder<B, O> {
     /// Adds a bounded function bounded between [lower,higher[ of function func.
-    pub fn with<F: Fn(B) -> O + 'static>(mut self, lower: B, func: F) -> Self {
+    pub fn with(mut self, lower: B, func: Box<dyn Fn(B) -> O>) -> Self {
         debug_assert!(self.can_insert(&lower));
         let f = LowerBoundedFunction {
-            func: Box::new(func),
+            func,
             lower,
         };
         self.funcs.push(f);
