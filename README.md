@@ -1,4 +1,4 @@
-Support an Open Source Developer! :heart:  
+Support an Open Source Developer! :hearts:  
 
 [![Become a patron](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/jojolepro)
 
