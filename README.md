@@ -22,6 +22,14 @@ let p = PartialFunction::new()
     .build();
 assert_eq!(p.eval(5.0), Some(10.0));
 ```
+or even as:
+```rust
+let p = partfn! {
+    [0.0, 5.0]:  x -> x,
+    [5.0, 10.0]: x -> x * 2,
+};
+assert_eq!(p.eval(5.0), Some(10.0));
+```
 
 ## Lower Partial Function
 
@@ -38,6 +46,14 @@ let f = LowerPartialFunction::new()
     .with(0.0, Box::new(|x| x    ))
     .with(5.0, Box::new(|x| x * 2))
     .build();
+assert_eq!(f.eval(5.0), Some(10.0));
+```
+or even as:
+```rust
+let f = lowpartfn! {
+    [0.0]: x -> x,
+    [5.0]: x -> x * 2,
+};
 assert_eq!(f.eval(5.0), Some(10.0));
 ```
 
