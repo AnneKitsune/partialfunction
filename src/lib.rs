@@ -168,3 +168,27 @@ impl<B: PartialOrd, O> LowerPartialFunctionBuilder<B, O> {
         LowerPartialFunction { funcs: self.funcs }
     }
 }
+
+/// More convenient syntax to create a partial function
+#[macro_export]
+macro_rules! partfn {
+    ( $( [$start:expr, $end:expr]: $var:ident -> $f:expr,)* ) => {
+        {
+            let mut func = PartialFunction::new();
+            $( func = func.with($start, $end, Box::new(|$var| $f)); )*
+            func.build()
+        }
+    };
+}
+
+/// More convenient syntax to create a lower partial function
+#[macro_export]
+macro_rules! lowpartfn {
+    ( $( [$bound:expr]: $var:ident -> $f:expr,)* ) => {
+        {
+            let mut func = LowerPartialFunction::new();
+            $( func = func.with($bound, Box::new(|$var| $f)); )*
+            func.build()
+        }
+    };
+}
