@@ -15,7 +15,7 @@ f(x) = {
 }
 ```
 Expressed as:
-```rs
+```rust
 let p = PartialFunction::new()
     .with(0.0, 5.0,  Box::new(|x| x    ))
     .with(5.0, 10.0, Box::new(|x| x * 2))
@@ -33,7 +33,7 @@ f(x) = {
 }
 ```
 Expressed as:
-```rs
+```rust
 let f = LowerPartialFunction::new()
     .with(0.0, Box::new(|x| x    ))
     .with(5.0, Box::new(|x| x * 2))
