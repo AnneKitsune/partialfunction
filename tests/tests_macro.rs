@@ -8,7 +8,11 @@ extern crate partial_function;
 #[allow(unused_variables)]
 mod tests {
     use partial_function::*;
+    #[cfg(target_family = "wasm")]
+    use wasm_bindgen_test::*;
+
     #[test]
+    #[cfg_attr(target_family = "wasm", wasm_bindgen_test)]
     fn single() {
         let p = partfn! {
             [0.0, 1.0]: x -> x,
@@ -16,6 +20,7 @@ mod tests {
         assert_eq!(Some(0.5), p.eval(0.5));
     }
     #[test]
+    #[cfg_attr(target_family = "wasm", wasm_bindgen_test)]
     fn single_start() {
         let p = partfn! {
             [0.0, 1.0]: x -> x,
@@ -23,6 +28,7 @@ mod tests {
         assert_eq!(Some(0.0), p.eval(0.0));
     }
     #[test]
+    #[cfg_attr(target_family = "wasm", wasm_bindgen_test)]
     fn single_ending() {
         let p = partfn! {
             [0.0, 1.0]: x -> x,
@@ -30,6 +36,7 @@ mod tests {
         assert_eq!(Some(1.0), p.eval(1.0));
     }
     #[test]
+    #[cfg_attr(target_family = "wasm", wasm_bindgen_test)]
     fn single_nan() {
         let p = partfn! {
             [0.0, 1.0]: x -> x,
@@ -37,6 +44,7 @@ mod tests {
         assert!(p.eval(999.0).is_none());
     }
     #[test]
+    #[cfg_attr(target_family = "wasm", wasm_bindgen_test)]
     fn dual_start() {
         let p = partfn! {
             [1.0, 2.0]: x -> 5.0,
@@ -45,6 +53,7 @@ mod tests {
         assert_eq!(Some(5.0), p.eval(1.0));
     }
     #[test]
+    #[cfg_attr(target_family = "wasm", wasm_bindgen_test)]
     fn dual_end() {
         let p = partfn! {
             [0.0, 1.0]: x -> x,
@@ -94,6 +103,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg_attr(target_family = "wasm", wasm_bindgen_test)]
     fn lower_partial_normal() {
         let f = lowpartfn! {
             [0.0]: x -> 1,
@@ -107,6 +117,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg_attr(target_family = "wasm", wasm_bindgen_test)]
     fn lower_partial_inverse_insert() {
         let f = lowpartfn! {
             [1.0]: x -> 2,
